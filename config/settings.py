@@ -147,4 +147,10 @@ SIMPLE_JWT = {
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
 }
 
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'LMS API',
+    'DESCRIPTION': 'AI-powered Learning Management System',
+    'VERSION': '1.0.0',
+}
+
 CORS_ALLOW_ALL_ORIGINS = True
