@@ -17,7 +17,7 @@ class Course(models.Model):
         return self.title
     
 class Lesson(models.Model):
-    course = models.ForeignKey(Course,on_delete=models.CASCADE)
+    course = models.ForeignKey(Course,on_delete=models.CASCADE,related_name='lessons')
     title = models.CharField(max_length=200)
     content = models.TextField()
     order = models.PositiveIntegerField()
@@ -32,6 +32,7 @@ class Lesson(models.Model):
 class Enrollment(models.Model):
     student = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.CASCADE)
     course = models.ForeignKey(Course,on_delete=models.CASCADE)
+    enrolled_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         unique_together = ('student', 'course')
@@ -43,6 +44,7 @@ class Progress(models.Model):
     student = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.CASCADE)
     lesson = models.ForeignKey(Lesson,on_delete=models.CASCADE)
     completed = models.BooleanField(default=False)
+    completed_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         unique_together = ('student','lesson')
