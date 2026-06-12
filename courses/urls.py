@@ -40,7 +40,7 @@ urlpatterns = [
         name='lesson-complete'
     ),
     path(
-        'my/progress/', 
+        'myprogress/', 
         MyProgressView.as_view(), 
         name='my-progress'
     ),
