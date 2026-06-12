@@ -5,7 +5,8 @@ from .views import (
     CourseDetailView,
     EnrollView,
     LessonDetailView,
-    CompleteLessonView
+    CompleteLessonView,
+    MyProgressView
 )
 
 urlpatterns = [
@@ -37,5 +38,10 @@ urlpatterns = [
         'lessons/<int:pk>/complete/',
         CompleteLessonView.as_view(),
         name='lesson-complete'
+    ),
+    path(
+        'my/progress/', 
+        MyProgressView.as_view(), 
+        name='my-progress'
     ),
 ]

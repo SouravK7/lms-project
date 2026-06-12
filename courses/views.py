@@ -111,3 +111,27 @@ class CompleteLessonView(APIView):
             },
             status=status.HTTP_200_OK
         )
+
+class MyProgressView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        data = []
+        enrollments = Enrollment.objects.filter(student=request.user).select_related('course')
+        for enrollment in enrollments:
+            course = enrollment.course
+            total = course.lessons.count()
+            completed = Progress.objects.filter(
+                student=request.user,
+                lesson__course=course,
+                completed=True
+            ).count()
+            percent = (completed / total * 100) if total else 0
+            data.append({
+                "course_id": course.id,
+                "course": course.title,
+                "total_lessons": total,
+                "completed_lessons": completed,
+                "percent_complete": round(percent, 1),
+            })
+        return Response(data)
