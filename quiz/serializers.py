@@ -24,3 +24,11 @@ class QuizSerializer(serializers.ModelSerializer):
     class Meta:
         model = Quiz
         fields = ['id','pass_score','questions']
+
+class AnswerSubmissionSerializer(serializers.Serializer):
+    question_id = serializers.IntegerField()
+    choice_id = serializers.IntegerField()
+
+
+class QuizSubmissionSerializer(serializers.Serializer):
+    answers = AnswerSubmissionSerializer(many=True)

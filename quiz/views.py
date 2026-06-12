@@ -8,9 +8,14 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 
+from drf_spectacular.utils import extend_schema
+
 from django.utils import timezone
 
-from .serializers import QuizSerializer
+from .serializers import (
+    QuizSerializer,
+    QuizSubmissionSerializer
+)
 
 from .models import (Quiz, QuizAttempt)
 from courses.models import Progress
@@ -24,7 +29,10 @@ class QuizDetailView(RetrieveAPIView):
 
 class QuizSubmitView(APIView):
     permission_classes = [IsAuthenticated]
-
+    @extend_schema(
+        request=QuizSubmissionSerializer,
+        responses={200: dict}
+    )
     def post(self, request, pk):
         quiz = get_object_or_404(
             Quiz.objects.prefetch_related(
@@ -32,7 +40,16 @@ class QuizSubmitView(APIView):
             ), 
             pk=pk
         )
-        answers = request.data.get('answers', [])
+        serializer = QuizSubmissionSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        answers = serializer.validated_data['answers']
+
+        if not answers:
+            return Response(
+                {"error": "No answers submitted."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         # build {question_id: correct_choice_id}
         correct_map = {}
@@ -42,7 +59,10 @@ class QuizSubmitView(APIView):
 
         total = len(correct_map)
         if total == 0:
-            return Response({"error": "This quiz has no questions."}, status=400)
+            return Response(
+                {"error": "This quiz has no questions."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         correct_count = 0
         for ans in answers:
