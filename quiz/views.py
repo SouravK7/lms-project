@@ -1,20 +1,24 @@
-from django.shortcuts import render
+# from django.shortcuts import render
 
 from django.shortcuts import get_object_or_404
 
 from rest_framework import status
 from rest_framework.generics import RetrieveAPIView
-from rest_framework.views import APIView, Response
+from rest_framework.views import APIView
+from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+
+from django.utils import timezone
 
 from .serializers import QuizSerializer
 
-from .models import Quiz, QuizAttempt
+from .models import (Quiz, QuizAttempt)
+from courses.models import Progress
 
 # Create your views here.
 
 class QuizDetailView(RetrieveAPIView):
-    queryset = Quiz.object.all()
+    queryset = Quiz.objects.all()
     serializer_class = QuizSerializer
     permission_classes = [IsAuthenticated]
 
@@ -22,7 +26,12 @@ class QuizSubmitView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, pk):
-        quiz = get_object_or_404(Quiz, pk=pk)
+        quiz = get_object_or_404(
+            Quiz.objects.prefetch_related(
+                'questions__choices'
+            ), 
+            pk=pk
+        )
         answers = request.data.get('answers', [])
 
         # build {question_id: correct_choice_id}
@@ -45,12 +54,24 @@ class QuizSubmitView(APIView):
         score = (correct_count / total) * 100
         passed = score >= quiz.pass_score
 
-        attempt = QuizAttempt.objects.create(
+        QuizAttempt.objects.create(
             student=request.user,
             quiz=quiz,
             score=score,
             passed=passed,
         )
+
+        if passed:
+            progress, created = Progress.objects.get_or_create(
+                student=request.user,
+                lesson=quiz.lesson
+            )
+
+            progress.completed = True
+            if not progress.completed_at:
+                progress.completed_at = timezone.now()
+
+            progress.save()
 
         return Response({
             "score": score,
