@@ -12,6 +12,8 @@ from courses.models import Lesson
 
 from .serializers import ChatRequestSerializer
 
+from drf_spectacular.utils import extend_schema
+
 from google import genai
 
 # Create your views here.
@@ -21,6 +23,9 @@ client = genai.Client(
 
 class ChatView(APIView):
     permission_classes = [IsAuthenticated]
+    @extend_schema(
+        request=ChatRequestSerializer
+    )
     def post(self, request):
         serializer = ChatRequestSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
