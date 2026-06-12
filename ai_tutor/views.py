@@ -29,24 +29,21 @@ class ChatView(APIView):
         message = serializer.validated_data['message']
         lesson = get_object_or_404(Lesson,pk=lesson_id)
 
-        prompt = f"""
-        You are an AI tutor helping a student learn.
-
-        Lesson Title:
-        {lesson.title}
-
-        Lesson Content:
-        {lesson.content[:1500]}
-
-        Student Question:
-        {message}
-
-        Answer clearly and concisely based on the lesson.
-        """
+        system_prompt = (
+            f"You are an AI tutor helping a student with the lesson "
+            f"'{lesson.title}'.\n\n"
+            f"Lesson content:\n{lesson.content[:1500]}\n\n"
+            "Answer clearly and concisely. If the question is unrelated "
+            "to this lesson, gently steer the student back to the topic."
+        )
+        full_prompt = (
+            f"{system_prompt}\n\n"
+            f"Student Question:\n{message}"
+        )
         try:
             ai_response = client.models.generate_content(
                 model="gemini-2.5-flash",
-                contents=prompt
+                contents=full_prompt
             )
 
             reply = ai_response.text
