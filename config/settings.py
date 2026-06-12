@@ -25,6 +25,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config('SECRET_KEY')
 DEBUG = config('DEBUG', default=True, cast=bool)
 
+GEMINI_API_KEY = config('GEMINI_API_KEY')
+
 ALLOWED_HOSTS = []
 
 
