@@ -6,18 +6,27 @@ export const loadMessages = (lessonId) => {
   try {
     const data = localStorage.getItem(getChatKey(lessonId));
     return data ? JSON.parse(data) : [];
-  } catch {
+  } catch (err) {
+    console.warn("Failed to load chat messages", err);
     return [];
   }
 };
 
 export const saveMessages = (lessonId, messages) => {
-  localStorage.setItem(
-    getChatKey(lessonId),
-    JSON.stringify(messages)
-  );
+  try {
+    localStorage.setItem(
+      getChatKey(lessonId),
+      JSON.stringify(messages || [])
+    );
+  } catch (err) {
+    console.warn("Failed to save chat messages", err);
+  }
 };
 
 export const clearMessages = (lessonId) => {
-  localStorage.removeItem(getChatKey(lessonId));
+  try {
+    localStorage.removeItem(getChatKey(lessonId));
+  } catch (err) {
+    console.warn("Failed to clear chat messages", err);
+  }
 };
