@@ -25,8 +25,37 @@ class RegisterSerializer(serializers.ModelSerializer):
     
 
 class ProfileSerializer(serializers.ModelSerializer):
-    
+    bio = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        max_length=300
+    )
     class Meta:
         model = User
         fields = ['username','email','role','bio']
         read_only_fields = ['username','role']
+
+class ChangePasswordSerializer(serializers.Serializer):
+    current_password = serializers.CharField(write_only=True)
+
+    new_password = serializers.CharField(
+        write_only=True,
+        min_length=8
+    )
+
+    confirm_password = serializers.CharField(write_only=True)
+
+    def validate(self, attrs):
+        user = self.context['request'].user
+
+        if not user.check_password(attrs['current_password']):
+            raise serializers.ValidationError({
+                'current_password': 'Current password is incorrect.'
+            })
+
+        if attrs['new_password'] != attrs['confirm_password']:
+            raise serializers.ValidationError({
+                'confirm_password': 'Passwords do not match.'
+            })
+
+        return attrs
