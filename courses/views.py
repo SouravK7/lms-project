@@ -12,6 +12,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from rest_framework.filters import SearchFilter
+from rest_framework.filters import OrderingFilter
+
 from .models import (
     Course,
     Lesson,
@@ -30,7 +33,15 @@ from .permissions import IsInstructorOrReadOnly
 class CourseListCreateView(ListCreateAPIView):
     queryset = Course.objects.filter(published=True)
     serializer_class = CourseSerializer
-    permission_classes = [IsInstructorOrReadOnly]
+    permission_classes = [IsAuthenticated,IsInstructorOrReadOnly]
+    search_fields = [
+        'title',
+        'description',
+    ]
+    ordering_fields = [
+        'title',
+        'created_at',
+    ]
 
     def perform_create(self, serializer):
         serializer.save(

@@ -30,7 +30,16 @@ class CourseSerializer(serializers.ModelSerializer):
         return Enrollment.objects.filter(student=request.user,course=obj).exists()
     class Meta:
         model = Course
-        fields = ['id','title','description','instructor_name','published','lesson_count','is_enrolled']
+        fields = [
+            'id',
+            'title',
+            'description',
+            'instructor_name',
+            'published',
+            'created_at',
+            'lesson_count',
+            'is_enrolled'
+        ]
 
 
 class CourseDetailSerializer(serializers.ModelSerializer):
@@ -61,6 +70,7 @@ class CourseDetailSerializer(serializers.ModelSerializer):
             'description',
             'instructor_name',
             'published',
+            'created_at',
             'lessons',
             'is_enrolled'
         ]
