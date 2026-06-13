@@ -7,6 +7,9 @@ from rest_framework.generics import RetrieveAPIView
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import PermissionDenied
+
+from courses.models import Enrollment
 
 from drf_spectacular.utils import extend_schema
 
@@ -18,7 +21,7 @@ from .serializers import (
 )
 
 from .models import (Quiz, QuizAttempt)
-from courses.models import Progress
+from courses.models import (Progress,Enrollment)
 
 # Create your views here.
 
@@ -26,6 +29,21 @@ class QuizDetailView(RetrieveAPIView):
     queryset = Quiz.objects.all()
     serializer_class = QuizSerializer
     permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        quiz = super().get_object()
+
+        enrolled = Enrollment.objects.filter(
+            student=self.request.user,
+            course=quiz.lesson.course
+        ).exists()
+
+        if not enrolled:
+            raise PermissionDenied(
+                "Enroll in the course first."
+            )
+
+        return quiz
 
 class QuizSubmitView(APIView):
     permission_classes = [IsAuthenticated]
@@ -40,6 +58,19 @@ class QuizSubmitView(APIView):
             ), 
             pk=pk
         )
+        enrolled = Enrollment.objects.filter(
+            student=request.user,
+            course=quiz.lesson.course
+        ).exists()
+        
+        if not enrolled:
+            return Response(
+                {
+                    "error": "Enroll in the course first."
+                },
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
         serializer = QuizSubmissionSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 

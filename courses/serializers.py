@@ -1,13 +1,36 @@
 from rest_framework import serializers
-from .models import Course, Lesson, Enrollment
+from .models import (Course, Lesson, Enrollment, Progress)
 
 class LessonSerializer(serializers.ModelSerializer):
     quiz_id = serializers.SerializerMethodField()
+    is_completed = serializers.SerializerMethodField()
+
     def get_quiz_id(self, obj):
         return obj.quiz.id if hasattr(obj, 'quiz') else None
+
+    def get_is_completed(self, obj):
+        request = self.context.get('request')
+
+        if not request or request.user.is_anonymous:
+            return False
+
+        return Progress.objects.filter(
+            student=request.user,
+            lesson=obj,
+            completed=True
+        ).exists()
+
     class Meta:
         model = Lesson
-        fields = ['id','title','content','order','video_url','quiz_id']
+        fields = [
+            'id',
+            'title',
+            'content',
+            'order',
+            'video_url',
+            'quiz_id',
+            'is_completed'
+        ]
 
 class CourseSerializer(serializers.ModelSerializer):
     
