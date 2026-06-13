@@ -16,6 +16,7 @@ import CourseDetailPage from "./pages/CourseDetailPage";
 import LessonPage from "./pages/LessonPage";
 import QuizPage from "./pages/QuizPage";
 import AITutorPage from "./pages/AITutorPage";
+import ProfilePage from "./pages/ProfilePage";
 
 function App() {
   return (
@@ -78,6 +79,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <AITutorPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <ProfilePage/>
               </ProtectedRoute>
             }
           />
