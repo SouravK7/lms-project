@@ -1,4 +1,4 @@
-# LearnHub
+# 🎓 LearnHub
 
 An AI-powered Learning Management System (LMS) built using **Django REST Framework** and **React**.
 
