@@ -1,825 +1,313 @@
 import { useEffect, useState } from "react";
-
-import {
-
-  useParams,
-
-  useNavigate
-
-}
-
-from "react-router-dom";
-
-import {
-
-  ArrowLeft,
-
-  Plus,
-
-  Trash2,
-
-  Save
-
-}
-
-from "lucide-react";
+import { useNavigate, useParams } from "react-router-dom";
+import { ArrowLeft, Plus, Save, Trash2 } from "lucide-react";
 
 import Navbar from "../components/Navbar";
-
 import api from "../api/axios";
 
-
 function EditQuizPage() {
-
-
   const { id } = useParams();
-
   const navigate = useNavigate();
 
+  const [quiz, setQuiz] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
 
-  const [quiz,setQuiz] = useState(null);
-
-  const [loading,setLoading] = useState(true);
-
-  const [saving,setSaving] = useState(false);
-
-  const [error,setError] = useState("");
-
-
-
-  useEffect(()=>{
-
-
-    const fetchQuiz = async()=>{
-
-
-      try{
-
-        const response = await api.get(
-
-          `/api/quizzes/${id}/`
-
-        );
-
-
-        setQuiz(
-
-          response.data
-
-        );
-
-      }
-
-      catch{
-
-        setError(
-
-          "Unable to load quiz."
-
-        );
-
-      }
-
-      finally{
-
+  useEffect(() => {
+    const fetchQuiz = async () => {
+      try {
+        const response = await api.get(`/api/instructor/quizzes/${id}/`);
+        setQuiz(response.data);
+      } catch {
+        setError("Unable to load quiz.");
+      } finally {
         setLoading(false);
-
       }
-
     };
 
-
     fetchQuiz();
+  }, [id]);
 
-
-  },[id]);
-
-
-
-
-
-  const handlePassScore=(e)=>{
-
-    setQuiz({
-
-      ...quiz,
-
-      pass_score:e.target.value
-
-    });
-
+  const updateQuestion = (qIndex, updater) => {
+    setQuiz((current) => ({
+      ...current,
+      questions: current.questions.map((question, index) =>
+        index === qIndex ? updater(question) : question
+      ),
+    }));
   };
 
-
-
-
-
-  const handleQuestionChange=(
-
-    index,
-
-    field,
-
-    value
-
-  )=>{
-
-
-    const updated=[
-
-      ...quiz.questions
-
-    ];
-
-
-    updated[index][field]=value;
-
-
+  const handlePassScore = (event) => {
     setQuiz({
-
       ...quiz,
-
-      questions:updated
-
+      pass_score: event.target.value,
     });
-
   };
 
-
-
-
-
-  const handleChoiceChange=(
-
-    qIndex,
-
-    cIndex,
-
-    value
-
-  )=>{
-
-
-    const updated=[
-
-      ...quiz.questions
-
-    ];
-
-
-    updated[qIndex]
-
-    .choices[cIndex]
-
-    .text=value;
-
-
-    setQuiz({
-
-      ...quiz,
-
-      questions:updated
-
-    });
-
+  const handleQuestionChange = (qIndex, field, value) => {
+    updateQuestion(qIndex, (question) => ({
+      ...question,
+      [field]: value,
+    }));
   };
 
-
-
-
-
-  const setCorrectChoice=(
-
-    qIndex,
-
-    cIndex
-
-  )=>{
-
-
-    const updated=[
-
-      ...quiz.questions
-
-    ];
-
-
-    updated[qIndex]
-
-    .choices
-
-    .forEach((choice,index)=>{
-
-      choice.is_correct=
-
-      index===cIndex;
-
-    });
-
-
-    setQuiz({
-
-      ...quiz,
-
-      questions:updated
-
-    });
-
-  };
-
-
-
-
-
-
-  const addQuestion=()=>{
-
-
-    setQuiz({
-
-      ...quiz,
-
-      questions:[
-
-        ...quiz.questions,
-
-        {
-
-          text:"",
-
-          question_type:"MCQ",
-
-          choices:[
-
-            {
-
-              text:"",
-
-              is_correct:true
-
-            },
-
-            {
-
-              text:"",
-
-              is_correct:false
-
+  const handleChoiceChange = (qIndex, cIndex, value) => {
+    updateQuestion(qIndex, (question) => ({
+      ...question,
+      choices: question.choices.map((choice, index) =>
+        index === cIndex
+          ? {
+              ...choice,
+              text: value,
             }
+          : choice
+      ),
+    }));
+  };
 
-          ]
+  const setCorrectChoice = (qIndex, cIndex) => {
+    updateQuestion(qIndex, (question) => ({
+      ...question,
+      choices: question.choices.map((choice, index) => ({
+        ...choice,
+        is_correct: index === cIndex,
+      })),
+    }));
+  };
 
+  const addQuestion = async () => {
+    try {
+      const response = await api.post(
+        `/api/instructor/quizzes/${id}/questions/`,
+        {
+          text: "",
+          question_type: "MCQ",
         }
+      );
 
-      ]
-
-    });
-
+      setQuiz({
+        ...quiz,
+        questions: [...quiz.questions, response.data],
+      });
+    } catch {
+      alert("Unable to add question.");
+    }
   };
 
+  const deleteQuestion = async (qIndex) => {
+    const question = quiz.questions[qIndex];
 
+    if (!window.confirm("Delete this question?")) {
+      return;
+    }
 
+    try {
+      await api.delete(`/api/instructor/questions/${question.id}/`);
 
-
-
-  const addChoice=(qIndex)=>{
-
-
-    const updated=[
-
-      ...quiz.questions
-
-    ];
-
-
-    updated[qIndex]
-
-    .choices
-
-    .push({
-
-      text:"",
-
-      is_correct:false
-
-    });
-
-
-    setQuiz({
-
-      ...quiz,
-
-      questions:updated
-
-    });
-
+      setQuiz({
+        ...quiz,
+        questions: quiz.questions.filter((_, index) => index !== qIndex),
+      });
+    } catch {
+      alert("Unable to delete question.");
+    }
   };
 
+  const addChoice = async (qIndex) => {
+    const question = quiz.questions[qIndex];
 
+    try {
+      const response = await api.post(
+        `/api/instructor/questions/${question.id}/choices/`,
+        {
+          text: "",
+          is_correct: question.choices.length === 0,
+        }
+      );
 
-
-
-
-
-  const deleteQuestion=(index)=>{
-
-
-    const updated=[
-
-      ...quiz.questions
-
-    ];
-
-
-    updated.splice(
-
-      index,
-
-      1
-
-    );
-
-
-    setQuiz({
-
-      ...quiz,
-
-      questions:updated
-
-    });
-
+      updateQuestion(qIndex, (currentQuestion) => ({
+        ...currentQuestion,
+        choices: [...currentQuestion.choices, response.data],
+      }));
+    } catch {
+      alert("Unable to add choice.");
+    }
   };
 
+  const deleteChoice = async (qIndex, cIndex) => {
+    const choice = quiz.questions[qIndex].choices[cIndex];
 
+    if (!window.confirm("Delete this choice?")) {
+      return;
+    }
 
+    try {
+      await api.delete(`/api/instructor/choices/${choice.id}/`);
 
+      updateQuestion(qIndex, (question) => ({
+        ...question,
+        choices: question.choices.filter((_, index) => index !== cIndex),
+      }));
+    } catch {
+      alert("Unable to delete choice.");
+    }
+  };
 
-
-
-
-  const saveQuiz=async()=>{
-
-
-    try{
-
-
+  const saveQuiz = async () => {
+    try {
       setSaving(true);
 
+      await api.patch(`/api/instructor/quizzes/${id}/`, {
+        pass_score: quiz.pass_score,
+      });
 
-      await api.patch(
+      for (const question of quiz.questions) {
+        await api.patch(`/api/instructor/questions/${question.id}/`, {
+          text: question.text,
+          question_type: question.question_type,
+        });
 
-        `/api/instructor/quizzes/${id}/`,
+        for (const choice of question.choices) {
+          await api.patch(`/api/instructor/choices/${choice.id}/`, {
+            text: choice.text,
+            is_correct: choice.is_correct,
+          });
+        }
+      }
 
-        quiz
-
-      );
-
-
-      alert(
-
-        "Quiz updated successfully."
-
-      );
-
-
+      alert("Quiz updated successfully.");
       navigate(-1);
-
-
-    }
-
-    catch{
-
-
-      alert(
-
-        "Unable to save quiz."
-
-      );
-
-    }
-
-    finally{
-
-
+    } catch {
+      alert("Unable to save quiz.");
+    } finally {
       setSaving(false);
-
     }
-
   };
 
-
-
-
-
-
-  if(loading){
-
-    return(
-
+  if (loading) {
+    return (
       <>
-
-      <Navbar/>
-
-      <div className="page-container">
-
-        Loading...
-
-      </div>
-
+        <Navbar />
+        <div className="page-container">Loading...</div>
       </>
-
     );
-
   }
 
-
-
-
-  if(error){
-
-    return(
-
+  if (error) {
+    return (
       <>
-
-      <Navbar/>
-
-      <div className="page-container">
-
-        <p className="error">
-
-          {error}
-
-        </p>
-
-      </div>
-
+        <Navbar />
+        <div className="page-container">
+          <p className="error">{error}</p>
+        </div>
       </>
-
     );
-
   }
-
-
-
-
-
 
   return (
-
     <>
-
-      <Navbar/>
-
+      <Navbar />
 
       <div className="page-container instructor-form-page">
-
-
-
-        <button
-
-          className="back-btn"
-
-          onClick={()=>navigate(-1)}
-
-        >
-
-          <ArrowLeft size={18}/>
-
+        <button className="back-btn" onClick={() => navigate(-1)}>
+          <ArrowLeft size={18} />
           Back
-
         </button>
 
+        <h1>Edit Quiz</h1>
 
-
-
-
-        <h1>
-
-          Edit Quiz
-
-        </h1>
-
-
-
-
-
-        <label>
-
-          Pass Score
-
-        </label>
-
-
+        <label>Pass Score</label>
         <input
-
           type="number"
-
           value={quiz.pass_score}
-
           onChange={handlePassScore}
-
         />
 
-
-
-
-
-
-
-
-        {
-
-        quiz.questions.map(
-
-          (question,qIndex)=>(
-
-
-          <div
-
-            key={qIndex}
-
-            className="question-editor"
-
-          >
-
-
-
+        {quiz.questions.map((question, qIndex) => (
+          <div key={question.id} className="question-editor">
             <div className="question-top">
-
-
-              <h2>
-
-                Question
-
-                {qIndex+1}
-
-              </h2>
-
-
+              <h2>Question {qIndex + 1}</h2>
 
               <button
-
                 className="delete-btn"
-
-                onClick={()=>
-
-                deleteQuestion(qIndex)
-
-                }
-
+                onClick={() => deleteQuestion(qIndex)}
               >
-
-                <Trash2 size={18}/>
-
+                <Trash2 size={18} />
               </button>
-
-
             </div>
-
-
-
-
-
 
             <textarea
-
               rows={3}
-
               value={question.text}
-
-              onChange={(e)=>
-
-              handleQuestionChange(
-
-                qIndex,
-
-                "text",
-
-                e.target.value
-
-              )
-
+              onChange={(event) =>
+                handleQuestionChange(qIndex, "text", event.target.value)
               }
-
             />
 
-
-
-
-
-
             <select
-
-              value={
-
-                question.question_type
-
+              value={question.question_type}
+              onChange={(event) =>
+                handleQuestionChange(
+                  qIndex,
+                  "question_type",
+                  event.target.value
+                )
               }
-
-              onChange={(e)=>
-
-              handleQuestionChange(
-
-                qIndex,
-
-                "question_type",
-
-                e.target.value
-
-              )
-
-              }
-
             >
-
-              <option value="MCQ">
-
-                MCQ
-
-              </option>
-
-              <option value="TF">
-
-                True / False
-
-              </option>
-
+              <option value="MCQ">MCQ</option>
+              <option value="TF">True / False</option>
             </select>
 
+            {question.choices.map((choice, cIndex) => (
+              <div key={choice.id} className="choice-row">
+                <input
+                  type="radio"
+                  name={`question-${question.id}`}
+                  checked={choice.is_correct}
+                  aria-label={`Mark choice ${cIndex + 1} as correct`}
+                  onChange={() => setCorrectChoice(qIndex, cIndex)}
+                />
 
+                <input
+                  type="text"
+                  placeholder={`Choice ${cIndex + 1}`}
+                  value={choice.text}
+                  onChange={(event) =>
+                    handleChoiceChange(qIndex, cIndex, event.target.value)
+                  }
+                />
 
+                <button
+                  className="delete-btn"
+                  onClick={() => deleteChoice(qIndex, cIndex)}
+                >
+                  <Trash2 size={16} />
+                </button>
+              </div>
+            ))}
 
-
-
-
-            {
-
-            question.choices.map(
-
-            (choice,cIndex)=>(
-
-
-            <div
-
-              key={cIndex}
-
-              className="choice-row"
-
-            >
-
-
-
-              <input
-
-                type="radio"
-
-                checked={
-
-                  choice.is_correct
-
-                }
-
-                onChange={()=>
-
-                setCorrectChoice(
-
-                  qIndex,
-
-                  cIndex
-
-                )
-
-                }
-
-              />
-
-
-
-
-              <input
-
-                type="text"
-
-                value={choice.text}
-
-                onChange={(e)=>
-
-                handleChoiceChange(
-
-                  qIndex,
-
-                  cIndex,
-
-                  e.target.value
-
-                )
-
-                }
-
-              />
-
-
-            </div>
-
-            ))
-
-            }
-
-
-
-
-
-
-            <button
-
-              className="secondary-btn"
-
-              onClick={()=>
-
-              addChoice(qIndex)
-
-              }
-
-            >
-
-              <Plus size={18}/>
-
+            <button className="secondary-btn" onClick={() => addChoice(qIndex)}>
+              <Plus size={18} />
               Add Choice
-
             </button>
-
-
           </div>
-
-        ))
-
-        }
-
-
-
-
-
-
-
+        ))}
 
         <div className="editor-actions">
-
-
-          <button
-
-            className="secondary-btn"
-
-            onClick={addQuestion}
-
-          >
-
-            <Plus size={18}/>
-
+          <button className="secondary-btn" onClick={addQuestion}>
+            <Plus size={18} />
             Add Question
-
           </button>
 
-
-
-
-
-          <button
-
-            onClick={saveQuiz}
-
-            disabled={saving}
-
-          >
-
-            <Save size={18}/>
-
-            {
-
-            saving
-
-            ?
-
-            "Saving..."
-
-            :
-
-            "Save Quiz"
-
-            }
-
+          <button onClick={saveQuiz} disabled={saving}>
+            <Save size={18} />
+            {saving ? "Saving..." : "Save Quiz"}
           </button>
-
-
         </div>
-
-
       </div>
-
     </>
-
   );
-
 }
-
 
 export default EditQuizPage;
