@@ -6,7 +6,12 @@ from .views import (
     EnrollView,
     LessonDetailView,
     CompleteLessonView,
-    MyProgressView
+    MyProgressView,
+    CertificateView,
+    InstructorCourseListView,
+    InstructorCourseDetailView,
+    InstructorLessonCreateView,
+    InstructorLessonDetailView
 )
 
 urlpatterns = [
@@ -29,6 +34,12 @@ urlpatterns = [
     ),
 
     path(
+        "courses/<int:pk>/certificate/",
+        CertificateView.as_view(),
+        name="certificate"
+    ),
+
+    path(
         'lessons/<int:pk>/',
         LessonDetailView.as_view(),
         name='lesson-detail'
@@ -38,6 +49,29 @@ urlpatterns = [
         'lessons/<int:pk>/complete/',
         CompleteLessonView.as_view(),
         name='lesson-complete'
+    ),
+    path(
+        "instructor/courses/",
+        InstructorCourseListView.as_view(),
+        name="instructor-courses"
+
+    ),
+    path(
+        "instructor/courses/<int:pk>/",
+        InstructorCourseDetailView.as_view(),
+        name="instructor-course-detail"
+
+    ),
+    path(
+        "instructor/courses/<int:pk>/lessons/",
+        InstructorLessonCreateView.as_view(),
+        name="instructor-lessons"
+    ),
+    path(
+        "instructor/lessons/<int:pk>/",
+        InstructorLessonDetailView.as_view(),
+        name="instructor-lesson-detail"
+
     ),
     path(
         'myprogress/', 

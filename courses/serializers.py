@@ -1,5 +1,7 @@
 from rest_framework import serializers
 from .models import (Course, Lesson, Enrollment, Progress)
+from django.utils import timezone
+from django.db.models import Count
 
 class LessonSerializer(serializers.ModelSerializer):
     quiz_id = serializers.SerializerMethodField()
@@ -35,7 +37,7 @@ class LessonSerializer(serializers.ModelSerializer):
 class CourseSerializer(serializers.ModelSerializer):
     
     instructor_name = serializers.CharField(
-        source='instructor.username',
+        source='instructor.get_full_name',
         read_only=True
     )
     lesson_count = serializers.SerializerMethodField()
@@ -71,7 +73,7 @@ class CourseDetailSerializer(serializers.ModelSerializer):
         read_only=True
     )
     instructor_name = serializers.CharField(
-        source='instructor.username',
+        source='instructor.get_full_name',
         read_only=True
     )
     is_enrolled = serializers.SerializerMethodField()
@@ -96,4 +98,105 @@ class CourseDetailSerializer(serializers.ModelSerializer):
             'created_at',
             'lessons',
             'is_enrolled'
+        ]
+
+class CertificateSerializer(serializers.Serializer):
+
+    student_name = serializers.CharField()
+
+    course_name = serializers.CharField()
+
+    completed_at = serializers.DateField()
+
+    certificate_id = serializers.CharField()
+
+class InstructorCourseSerializer(serializers.ModelSerializer):
+
+    lesson_count = serializers.IntegerField(
+
+        source="lessons.count",
+
+        read_only=True
+
+    )
+
+
+    student_count = serializers.SerializerMethodField()
+
+
+    instructor_name = serializers.CharField(
+
+        source="instructor.get_full_name",
+
+        read_only=True
+
+    )
+
+
+    def get_student_count(self, obj):
+
+        return Enrollment.objects.filter(
+
+            course=obj
+
+        ).count()
+
+
+    class Meta:
+
+        model = Course
+
+        fields = [
+
+            "id",
+
+            "title",
+
+            "description",
+
+            "published",
+
+            "created_at",
+
+            "lesson_count",
+
+            "student_count",
+
+            "instructor_name"
+
+        ]
+
+
+
+
+class InstructorLessonSerializer(
+
+    serializers.ModelSerializer
+
+):
+
+    class Meta:
+
+        model = Lesson
+
+        fields = [
+
+            "id",
+
+            "title",
+
+            "content",
+
+            "order",
+
+            "video_url",
+
+            "course"
+
+        ]
+
+        read_only_fields = [
+
+            "course"
+
         ]

@@ -5,6 +5,8 @@ import Navbar from "../components/Navbar";
 import api from "../api/axios";
 import formatDate from "../utils/formatDate";
 
+import { PlayCircle } from "lucide-react";
+
 function CourseDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -142,14 +144,15 @@ function CourseDetailPage() {
               {lesson.order}. {lesson.title}
             </h3>
 
-            <p>
-              {lesson.quiz_id ? "Quiz Available" : "Lesson Only"}
+            <p className="lesson-type">
+              {lesson.quiz_id ? "Quiz Included" : "Lesson Only"}
             </p>
 
             {course.is_enrolled ? (
-              <Link to={`/lessons/${lesson.id}`}>
+              <Link  className="action-btn" to={`/lessons/${lesson.id}`}> 
+                <PlayCircle />
                 Open Lesson
-              </Link>
+            </Link>
             ) : (
               <p className="locked-text">Locked</p>
             )}
