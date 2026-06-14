@@ -36,6 +36,12 @@ export function AuthProvider({ children }) {
 
   const [user, setUser] = useState(null);
 
+  const [isLoadingProfile, setIsLoadingProfile] = useState(
+
+    Boolean(accessToken)
+
+  );
+
 
 
 
@@ -48,9 +54,13 @@ export function AuthProvider({ children }) {
 
         setUser(null);
 
+        setIsLoadingProfile(false);
+
         return;
 
       }
+
+      setIsLoadingProfile(true);
 
 
       try {
@@ -68,6 +78,12 @@ export function AuthProvider({ children }) {
       catch {
 
         setUser(null);
+
+      }
+
+      finally {
+
+        setIsLoadingProfile(false);
 
       }
 
@@ -152,6 +168,8 @@ export function AuthProvider({ children }) {
         isAuthenticated:
 
           Boolean(accessToken),
+
+        isLoadingProfile,
 
       }}
 

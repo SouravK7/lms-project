@@ -24,6 +24,8 @@ from "./context/AuthContext";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 
+import InstructorRoute from "./components/InstructorRoute";
+
 
 import LoginPage from "./pages/LoginPage";
 
@@ -52,6 +54,8 @@ import CreateCoursePage from "./pages/CreateCoursePage";
 import EditCoursePage from "./pages/EditCoursePage";
 
 import EditLessonPage from "./pages/EditLessonPage";
+
+import InstructorLessonsPage from "./pages/InstructorLessonsPage";
 
 import EditQuizPage from "./pages/EditQuizPage";
 
@@ -243,7 +247,11 @@ function App() {
 
               <ProtectedRoute>
 
-                <InstructorDashboard/>
+                <InstructorRoute>
+
+                  <InstructorDashboard/>
+
+                </InstructorRoute>
 
               </ProtectedRoute>
 
@@ -260,7 +268,11 @@ function App() {
 
               <ProtectedRoute>
 
-                <CreateCoursePage/>
+                <InstructorRoute>
+
+                  <CreateCoursePage/>
+
+                </InstructorRoute>
 
               </ProtectedRoute>
 
@@ -277,7 +289,11 @@ function App() {
 
               <ProtectedRoute>
 
-                <EditCoursePage/>
+                <InstructorRoute>
+
+                  <EditCoursePage/>
+
+                </InstructorRoute>
 
               </ProtectedRoute>
 
@@ -294,7 +310,32 @@ function App() {
 
               <ProtectedRoute>
 
-                <EditLessonPage/>
+                <InstructorRoute>
+
+                  <InstructorLessonsPage/>
+
+                </InstructorRoute>
+
+              </ProtectedRoute>
+
+            }
+
+          />
+
+
+          <Route
+
+            path="/teacher/lesson/:id/edit"
+
+            element={
+
+              <ProtectedRoute>
+
+                <InstructorRoute>
+
+                  <EditLessonPage/>
+
+                </InstructorRoute>
 
               </ProtectedRoute>
 
@@ -311,7 +352,11 @@ function App() {
 
               <ProtectedRoute>
 
-                <EditQuizPage/>
+                <InstructorRoute>
+
+                  <EditQuizPage/>
+
+                </InstructorRoute>
 
               </ProtectedRoute>
 

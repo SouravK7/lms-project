@@ -271,7 +271,7 @@ function Navbar() {
 
           >
 
-            Instructor
+            Teach
 
           </NavLink>
 

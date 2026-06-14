@@ -18,6 +18,8 @@ import {
 
   ListOrdered,
 
+  FileQuestion,
+
   Eye,
 
   EyeOff
@@ -481,6 +483,28 @@ function InstructorDashboard() {
                 <ListOrdered size={18}/>
 
                 Lessons
+
+              </Link>
+
+
+
+
+
+              <Link
+
+                to={
+
+                `/teacher/course/${course.id}/lessons`
+
+                }
+
+                className="action-btn secondary-btn"
+
+              >
+
+                <FileQuestion size={18}/>
+
+                Quizzes
 
               </Link>
 
