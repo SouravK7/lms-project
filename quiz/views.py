@@ -3,6 +3,7 @@ from django.utils import timezone
 
 from rest_framework import status
 from rest_framework.generics import (
+    ListCreateAPIView,
     RetrieveAPIView,
     RetrieveUpdateDestroyAPIView,
     CreateAPIView
@@ -14,16 +15,17 @@ from rest_framework.exceptions import PermissionDenied
 
 from drf_spectacular.utils import extend_schema
 
-from courses.permissions import IsInstructorOrReadOnly
+from courses.permissions import IsInstructor
 
-from courses.models import Enrollment, Course, Progress
+from courses.models import Enrollment, Progress
 
 from .models import Quiz, QuizAttempt, Question, Choice
 from .serializers import (
     QuizSerializer,
     QuizSubmissionSerializer,
-    QuestionSerializer,
-    ChoiceSerializer
+    InstructorQuizSerializer,
+    InstructorQuestionSerializer,
+    InstructorChoiceSerializer
 )
 
 
@@ -163,27 +165,27 @@ class QuizSubmitView(APIView):
 # Instructor Views
 # -------------------------
 
-class InstructorQuizListView(APIView):
-    permission_classes = [IsAuthenticated]
+class InstructorQuizListView(ListCreateAPIView):
+    serializer_class = InstructorQuizSerializer
+    permission_classes = [IsInstructor]
 
-    def get(self, request):
-        if request.user.role != "instructor":
-            return Response(
-                {"error": "Instructor access only."},
-                status=status.HTTP_403_FORBIDDEN
-            )
-
-        quizzes = Quiz.objects.filter(
-            lesson__course__instructor=request.user
+    def get_queryset(self):
+        return Quiz.objects.filter(
+            lesson__course__instructor=self.request.user
         ).select_related("lesson", "lesson__course")
 
-        serializer = QuizSerializer(quizzes, many=True)
-        return Response(serializer.data)
+    def perform_create(self, serializer):
+        lesson = serializer.validated_data["lesson"]
+
+        if lesson.course.instructor != self.request.user:
+            raise PermissionDenied("You can only create quizzes for your lessons.")
+
+        serializer.save()
 
 
 class InstructorQuizDetailView(RetrieveUpdateDestroyAPIView):
-    serializer_class = QuizSerializer
-    permission_classes = [IsAuthenticated]
+    serializer_class = InstructorQuizSerializer
+    permission_classes = [IsInstructor]
 
     def get_queryset(self):
         return Quiz.objects.filter(
@@ -192,8 +194,8 @@ class InstructorQuizDetailView(RetrieveUpdateDestroyAPIView):
 
 
 class InstructorQuestionCreateView(CreateAPIView):
-    serializer_class = QuestionSerializer
-    permission_classes = [IsAuthenticated]
+    serializer_class = InstructorQuestionSerializer
+    permission_classes = [IsInstructor]
 
     def perform_create(self, serializer):
         quiz = get_object_or_404(
@@ -206,8 +208,8 @@ class InstructorQuestionCreateView(CreateAPIView):
 
 
 class InstructorQuestionDetailView(RetrieveUpdateDestroyAPIView):
-    serializer_class = QuestionSerializer
-    permission_classes = [IsAuthenticated]
+    serializer_class = InstructorQuestionSerializer
+    permission_classes = [IsInstructor]
 
     def get_queryset(self):
         return Question.objects.filter(
@@ -216,8 +218,8 @@ class InstructorQuestionDetailView(RetrieveUpdateDestroyAPIView):
 
 
 class InstructorChoiceCreateView(CreateAPIView):
-    serializer_class = ChoiceSerializer
-    permission_classes = [IsAuthenticated]
+    serializer_class = InstructorChoiceSerializer
+    permission_classes = [IsInstructor]
 
     def perform_create(self, serializer):
         question = get_object_or_404(
@@ -226,14 +228,31 @@ class InstructorChoiceCreateView(CreateAPIView):
             quiz__lesson__course__instructor=self.request.user
         )
 
-        serializer.save(question=question)
+        choice = serializer.save(question=question)
+        self.clear_other_correct_choices(choice)
+
+    def clear_other_correct_choices(self, choice):
+        if choice.is_correct:
+            Choice.objects.filter(
+                question=choice.question,
+                is_correct=True
+            ).exclude(pk=choice.pk).update(is_correct=False)
 
 
 class InstructorChoiceDetailView(RetrieveUpdateDestroyAPIView):
-    serializer_class = ChoiceSerializer
-    permission_classes = [IsAuthenticated]
+    serializer_class = InstructorChoiceSerializer
+    permission_classes = [IsInstructor]
 
     def get_queryset(self):
         return Choice.objects.filter(
             question__quiz__lesson__course__instructor=self.request.user
         )
+
+    def perform_update(self, serializer):
+        choice = serializer.save()
+
+        if choice.is_correct:
+            Choice.objects.filter(
+                question=choice.question,
+                is_correct=True
+            ).exclude(pk=choice.pk).update(is_correct=False)

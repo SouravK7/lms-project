@@ -174,6 +174,11 @@ class InstructorLessonSerializer(
     serializers.ModelSerializer
 
 ):
+    quiz_id = serializers.SerializerMethodField()
+
+    def get_quiz_id(self, obj):
+
+        return obj.quiz.id if hasattr(obj, "quiz") else None
 
     class Meta:
 
@@ -191,7 +196,9 @@ class InstructorLessonSerializer(
 
             "video_url",
 
-            "course"
+            "course",
+
+            "quiz_id"
 
         ]
 

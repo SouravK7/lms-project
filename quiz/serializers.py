@@ -8,7 +8,7 @@ class ChoiceSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Choice
-        fields = ['id','text','is_correct']
+        fields = ['id','text']
 
 class QuestionSerializer(serializers.ModelSerializer):
 
@@ -66,3 +66,70 @@ class AnswerSubmissionSerializer(serializers.Serializer):
 
 class QuizSubmissionSerializer(serializers.Serializer):
     answers = AnswerSubmissionSerializer(many=True)
+
+
+class InstructorChoiceSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Choice
+        fields = [
+            "id",
+            "text",
+            "is_correct",
+        ]
+        extra_kwargs = {
+            "text": {
+                "allow_blank": True,
+            },
+        }
+
+
+class InstructorQuestionSerializer(serializers.ModelSerializer):
+    choices = InstructorChoiceSerializer(
+        many=True,
+        read_only=True
+    )
+
+    class Meta:
+        model = Question
+        fields = [
+            "id",
+            "text",
+            "question_type",
+            "choices",
+        ]
+        extra_kwargs = {
+            "text": {
+                "allow_blank": True,
+            },
+        }
+
+
+class InstructorQuizSerializer(serializers.ModelSerializer):
+    questions = InstructorQuestionSerializer(
+        many=True,
+        read_only=True
+    )
+
+    class Meta:
+        model = Quiz
+        fields = [
+            "id",
+            "lesson",
+            "pass_score",
+            "questions",
+        ]
+
+    def validate_lesson(self, lesson):
+        request = self.context.get("request")
+
+        if (
+            request
+            and request.user.is_authenticated
+            and lesson.course.instructor != request.user
+        ):
+            raise serializers.ValidationError(
+                "You can only use lessons from your own courses."
+            )
+
+        return lesson
