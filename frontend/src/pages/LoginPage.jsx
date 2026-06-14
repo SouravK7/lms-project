@@ -41,7 +41,7 @@ function LoginPage() {
   return (
     <div className="auth-container">
       <div className="auth-card">
-        <h1>LMS</h1>
+        <h1>Learn Hub</h1>
         <p>Sign in to continue</p>
 
         <form onSubmit={handleSubmit}>

@@ -6,8 +6,8 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['username','email','password','password2','bio']
-        extra_kwargs = {'password': {'write_only': True}}
+        fields = ['first_name','last_name','username','email','password','password2','bio']
+        extra_kwargs = {'first_name': {'required': True },'password': {'write_only': True}}
         
     def validate(self, attrs):
         if attrs.get('password') != attrs.get('password2'):
@@ -32,8 +32,8 @@ class ProfileSerializer(serializers.ModelSerializer):
     )
     class Meta:
         model = User
-        fields = ['username','email','role','bio']
-        read_only_fields = ['username','role']
+        fields = ['first_name','last_name','username','email','role','bio']
+        read_only_fields = ['first_name','last_name','username','role']
 
 class ChangePasswordSerializer(serializers.Serializer):
     current_password = serializers.CharField(write_only=True)
