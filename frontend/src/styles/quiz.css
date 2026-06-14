@@ -1,0 +1,523 @@
+/* =========================
+   QUIZ PAGE
+========================= */
+
+.quiz-progress {
+
+  width: 100%;
+
+  height: 12px;
+
+  background: var(--border);
+
+  border-radius: 999px;
+
+  overflow: hidden;
+
+  margin: 25px 0 14px;
+
+}
+
+
+.quiz-progress-fill {
+
+  height: 100%;
+
+  background:
+
+    linear-gradient(
+
+      90deg,
+
+      #2563eb,
+
+      #3b82f6
+
+    );
+
+  border-radius: inherit;
+
+  transition:
+
+    width .3s ease;
+
+}
+
+
+.question-counter {
+
+  color: var(--text-secondary);
+
+  margin-bottom: 28px;
+
+}
+
+
+
+/* Question Card */
+
+.question-card {
+
+  background: var(--card);
+
+  border: 1px solid var(--border);
+
+  border-radius: 28px;
+
+  padding: 35px;
+
+  margin-bottom: 35px;
+
+  box-shadow:
+
+    0 15px 35px
+
+    rgba(0,0,0,.12);
+
+}
+
+
+.question-card h2 {
+
+  font-size: 1.6rem;
+
+  margin-bottom: 30px;
+
+}
+
+
+
+/* Options */
+
+.option-tile {
+
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+  gap: 20px;
+
+  padding: 18px 22px;
+
+  margin-bottom: 18px;
+
+  border:
+
+    2px solid
+
+    var(--border);
+
+  border-radius: 18px;
+
+  background: var(--card);
+
+  cursor: pointer;
+
+  transition:
+
+    all .2s ease;
+
+}
+
+
+.option-tile:hover {
+
+  transform:
+
+    translateY(-2px);
+
+  border-color:
+
+    #2563eb;
+
+  background:
+
+    var(--card-hover);
+
+}
+
+
+.option-tile.selected {
+
+  border-color:
+
+    #2563eb;
+
+  background:
+
+    rgba(
+
+      37,
+
+      99,
+
+      235,
+
+      .15
+
+    );
+
+  color:
+
+    #60a5fa;
+
+}
+
+
+.option-tile.selected svg {
+
+  color:
+
+    #60a5fa;
+
+}
+
+
+.option-tile span {
+
+  font-size: 1rem;
+
+  line-height: 1.7;
+
+}
+
+
+
+/* Navigation */
+
+.quiz-nav {
+
+  display: flex;
+
+  justify-content: space-between;
+
+  gap: 20px;
+
+}
+
+
+.quiz-nav button {
+
+  display: inline-flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  gap: 10px;
+
+}
+
+
+.quiz-nav button:last-child {
+
+  margin-left: auto;
+
+}
+
+
+
+/* Result Card */
+
+.result-card {
+
+  max-width: 650px;
+
+  margin: 50px auto;
+
+  padding: 50px;
+
+  text-align: center;
+
+  background: var(--card);
+
+  border:
+
+    1px solid
+
+    var(--border);
+
+  border-radius: 32px;
+
+  box-shadow:
+
+    0 20px 45px
+
+    rgba(0,0,0,.15);
+
+}
+
+
+.result-icon {
+
+  margin-bottom: 25px;
+
+}
+
+
+.result-pass-icon {
+
+  color: #eab308;
+
+}
+
+
+.result-fail-icon {
+
+  color: #ef4444;
+
+}
+
+
+.result-card h1 {
+
+  margin-bottom: 15px;
+
+}
+
+
+.result-card h2 {
+
+  font-size: 3rem;
+
+  margin-bottom: 20px;
+
+}
+
+
+.result-pass {
+
+  color: #22c55e;
+
+  font-weight: 700;
+
+  letter-spacing: 2px;
+
+  margin-bottom: 18px;
+
+}
+
+
+.result-fail {
+
+  color: #ef4444;
+
+  font-weight: 700;
+
+  letter-spacing: 2px;
+
+  margin-bottom: 18px;
+
+}
+
+
+.result-text {
+
+  color: var(--text-secondary);
+
+  line-height: 1.8;
+
+  margin:
+
+    25px 0
+
+    35px;
+
+}
+
+
+.result-card button {
+
+  display: inline-flex;
+
+  align-items: center;
+
+  gap: 10px;
+
+}
+
+
+
+/* Mobile */
+
+@media(max-width:768px){
+
+  .question-card {
+
+    padding: 25px;
+
+  }
+
+
+  .question-card h2 {
+
+    font-size: 1.3rem;
+
+  }
+
+
+  .option-tile {
+
+    padding: 16px;
+
+  }
+
+
+  .quiz-nav {
+
+    flex-direction: column;
+
+  }
+
+
+  .quiz-nav button {
+
+    width: 100%;
+
+  }
+
+
+  .result-card {
+
+    padding: 35px 25px;
+
+  }
+
+
+  .result-card h2 {
+
+    font-size: 2.2rem;
+
+  }
+
+}
+
+.review-list{
+
+  margin-top:40px;
+
+  display:flex;
+
+  flex-direction:column;
+
+  gap:20px;
+
+}
+
+
+.review-card{
+
+  text-align:left;
+
+  padding:25px;
+
+  border:
+
+    1px solid
+
+    var(--border);
+
+  border-radius:20px;
+
+  background:
+
+    var(--card-hover);
+
+}
+
+
+.review-top{
+
+  display:flex;
+
+  align-items:flex-start;
+
+  gap:14px;
+
+  margin-bottom:16px;
+
+}
+
+
+.review-top h3{
+
+  font-size:1rem;
+
+  line-height:1.6;
+
+}
+
+
+.review-correct{
+
+  color:#22c55e;
+
+  flex-shrink:0;
+
+}
+
+
+.review-wrong{
+
+  color:#ef4444;
+
+  flex-shrink:0;
+
+}
+
+
+.review-card p{
+
+  margin-top:10px;
+
+  color:var(--text-secondary);
+
+}
+
+
+.result-actions{
+
+  margin-top:35px;
+
+  display:flex;
+
+  justify-content:center;
+
+  gap:18px;
+
+}
+
+
+.result-actions button{
+
+  display:flex;
+
+  align-items:center;
+
+  gap:10px;
+
+}
+
+
+.secondary-btn{
+
+  background:
+
+    var(--card-hover);
+
+  color:
+
+    var(--text);
+
+}
+
+
+.secondary-btn:hover{
+
+  background:
+
+    var(--border);
+
+}
