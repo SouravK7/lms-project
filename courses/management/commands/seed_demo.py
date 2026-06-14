@@ -332,6 +332,19 @@ class Command(BaseCommand):
         
         progress_count = 15
         self.stdout.write(f'Progress records created: {progress_count}')
+
+        admin = User.objects.filter(username="admin").first()
+
+        if admin:
+            admin.delete()
+
+        User.objects.create_superuser(
+            username="admin",
+            email="admin@learnhub.com",
+            password="Admin@123"
+        )
+
+        self.stdout.write("Admin user created")
         
         # STEP 9: OUTPUT
         self.stdout.write(self.style.SUCCESS('Seed completed successfully'))
