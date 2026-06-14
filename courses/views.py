@@ -13,7 +13,7 @@ from rest_framework.filters import SearchFilter, OrderingFilter
 
 from .models import Course, Lesson, Enrollment, Progress
 from .serializers import (CourseSerializer, CourseDetailSerializer, LessonSerializer, CertificateSerializer,InstructorCourseSerializer,InstructorLessonSerializer)
-from .permissions import IsInstructorOrReadOnly
+from .permissions import IsInstructor, IsInstructorOrReadOnly
 
 
 class CourseListCreateView(ListCreateAPIView):
@@ -354,7 +354,7 @@ class InstructorCourseListView(
 
     permission_classes = [
 
-        IsAuthenticated
+        IsInstructor
 
     ]
 
@@ -400,7 +400,7 @@ class InstructorCourseDetailView(
 
     permission_classes = [
 
-        IsAuthenticated
+        IsInstructor
 
     ]
 
@@ -432,7 +432,7 @@ class InstructorLessonCreateView(
 
     permission_classes = [
 
-        IsAuthenticated
+        IsInstructor
 
     ]
 
@@ -501,7 +501,7 @@ class InstructorLessonDetailView(
 
     permission_classes = [
 
-        IsAuthenticated
+        IsInstructor
 
     ]
 
